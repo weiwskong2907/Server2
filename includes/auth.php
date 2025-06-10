@@ -1,5 +1,8 @@
 <?php
-session_start();
+// Initialize session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 function register($username, $password, $email) {
     // Include database connection
