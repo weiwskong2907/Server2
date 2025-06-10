@@ -1,7 +1,7 @@
 <?php
 // Database configuration
 $host = 'localhost'; // Database host
-$dbname = 'forum_db'; // Database name
+$dbname = 'php_forum'; // Database name
 $username = 'root'; // Database username
 $password = 'myrootpass'; // Database password
 
