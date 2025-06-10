@@ -11,7 +11,7 @@ define('BASE_URL', 'http://localhost/php-forum/');
 define('DEBUG_MODE', true);
 
 // Database settings
-define('DB_HOST', 'localhost');
+define('DB_HOST', 'mysql-db');
 define('DB_NAME', 'php_forum'); // Update with your database name
 define('DB_USER', 'root');
 define('DB_PASS', 'myrootpass'); // Update with your database password
