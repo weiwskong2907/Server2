@@ -21,6 +21,26 @@ function cleanInput(string $data, bool $strict = false): string {
 }
 
 /**
+ * Checks if user is logged in
+ * @return bool True if user is logged in
+ */
+function isLoggedIn(): bool {
+    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']) && 
+           isset($_SESSION['last_activity']) && 
+           (time() - $_SESSION['last_activity']) < 1800; // 30 minute timeout
+}
+
+/**
+ * Checks if logged in user is an admin
+ * @return bool True if user is admin
+ */
+function isAdmin(): bool {
+    return isLoggedIn() && 
+           isset($_SESSION['role']) && 
+           $_SESSION['role'] === 'admin';
+}
+
+/**
  * Generates a cryptographically secure invite code
  * @param int $length Length of the invite code
  * @return string Generated invite code
@@ -127,6 +147,16 @@ function redirectWithMessage(string $location, string $message, string $type = '
 }
 
 /**
+ * Updates user's last activity timestamp
+ * @return void
+ */
+function updateLastActivity(): void {
+    if (isLoggedIn()) {
+        $_SESSION['last_activity'] = time();
+    }
+}
+
+/**
  * Sanitizes file name for secure file operations
  * @param string $filename Original filename
  * @return string Sanitized filename
@@ -163,4 +193,88 @@ function deleteForum($id) {
     global $pdo;
     $stmt = $pdo->prepare("DELETE FROM forums WHERE id = :id");
     return $stmt->execute(['id' => $id]);
+}
+
+function someFunction() {
+    if (condition) {
+        // Some code
+    } // Make sure each opening brace has a matching closing brace
+} // This closing brace might be the extra one
+
+// Check for nested functions that might have extra braces
+function outerFunction() {
+    function innerFunction() {
+        // Code
+    } // Make sure nested functions are properly closed
+} // And their outer functions too
+
+/**
+ * Gets the most recent threads from all forums
+ * 
+ * @param int $limit Number of threads to return
+ * @return array Array of recent threads
+ */
+function getRecentThreads(int $limit = 5): array {
+    global $pdo;
+    
+    $sql = "SELECT 
+                t.id,
+                t.title,
+                t.created_at,
+                u.username as author,
+                f.name as forum_name,
+                (SELECT COUNT(*) FROM posts p WHERE p.thread_id = t.id) as reply_count
+            FROM threads t
+            JOIN users u ON t.user_id = u.id
+            JOIN forums f ON t.forum_id = f.id
+            WHERE t.deleted_at IS NULL
+            ORDER BY t.created_at DESC
+            LIMIT :limit";
+            
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        logError('Error getting recent threads: ' . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Gets active users with their latest activity
+ * 
+ * @param int $limit Number of users to return
+ * @return array Array of active users
+ */
+function getActiveUsers(int $limit = 10): array {
+    global $pdo;
+    
+    $sql = "SELECT 
+                u.id,
+                u.username,
+                u.last_seen,
+                u.avatar_url,
+                COUNT(DISTINCT t.id) as thread_count,
+                COUNT(DISTINCT p.id) as post_count
+            FROM users u
+            LEFT JOIN threads t ON u.id = t.user_id AND t.deleted_at IS NULL
+            LEFT JOIN posts p ON u.id = p.user_id AND p.deleted_at IS NULL
+            WHERE u.active = 1
+            GROUP BY u.id
+            ORDER BY u.last_seen DESC
+            LIMIT :limit";
+            
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        logError('Error getting active users: ' . $e->getMessage());
+        return [];
+    }
 }
