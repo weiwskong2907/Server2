@@ -21,26 +21,6 @@ function cleanInput(string $data, bool $strict = false): string {
 }
 
 /**
- * Checks if user is logged in
- * @return bool True if user is logged in
- */
-function isLoggedIn(): bool {
-    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']) && 
-           isset($_SESSION['last_activity']) && 
-           (time() - $_SESSION['last_activity']) < 1800; // 30 minute timeout
-}
-
-/**
- * Checks if logged in user is an admin
- * @return bool True if user is admin
- */
-function isAdmin(): bool {
-    return isLoggedIn() && 
-           isset($_SESSION['role']) && 
-           $_SESSION['role'] === 'admin';
-}
-
-/**
  * Generates a cryptographically secure invite code
  * @param int $length Length of the invite code
  * @return string Generated invite code
@@ -194,16 +174,3 @@ function deleteForum($id) {
     $stmt = $pdo->prepare("DELETE FROM forums WHERE id = :id");
     return $stmt->execute(['id' => $id]);
 }
-
-function someFunction() {
-    if (condition) {
-        // Some code
-    } // Make sure each opening brace has a matching closing brace
-} // This closing brace might be the extra one
-
-// Check for nested functions that might have extra braces
-function outerFunction() {
-    function innerFunction() {
-        // Code
-    } // Make sure nested functions are properly closed
-} // And their outer functions too
