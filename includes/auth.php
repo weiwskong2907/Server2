@@ -77,6 +77,7 @@ function isAdmin(): bool {
 
 /**
  * Updates user's last activity timestamp
+ * Used for session timeout management
  *
  * @return void
  */

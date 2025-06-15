@@ -127,16 +127,6 @@ function redirectWithMessage(string $location, string $message, string $type = '
 }
 
 /**
- * Updates user's last activity timestamp
- * @return void
- */
-function updateLastActivity(): void {
-    if (isLoggedIn()) {
-        $_SESSION['last_activity'] = time();
-    }
-}
-
-/**
  * Sanitizes file name for secure file operations
  * @param string $filename Original filename
  * @return string Sanitized filename
